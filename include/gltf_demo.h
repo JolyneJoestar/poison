@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <stdlib.h>
+#include "vulkan_render_system.h"
 
 class GLTFDemo
 {
@@ -18,13 +19,11 @@ public:
 	void run();
 
 private:
-	void initVulkan();
 	void mainLoop();
 	void cleanUp();
 	void initWindow();
-	void createInstance();
 
 private:
 	GLFWwindow* m_window;
-	VkInstance m_instance;
+	rs::VulkanRenderSystem* m_vulkanRenderSystem;
 };

@@ -21,9 +21,11 @@
   <ItemGroup>
     <ClCompile Include="src\gltf_demo.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vulkan_render_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gltf_demo.h" />
+    <ClInclude Include="src\vulkan_render_system.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E59F5A92-A633-4754-A77D-357722316631}</ProjectGuid>

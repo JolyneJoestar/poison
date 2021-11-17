@@ -3,26 +3,22 @@
 GLTFDemo::GLTFDemo()
 {
 	m_window = nullptr;
-	m_instance = NULL;
+	m_vulkanRenderSystem = new rs::VulkanRenderSystem;
 }
 
 GLTFDemo::~GLTFDemo()
 {
-
+	delete m_vulkanRenderSystem;
 }
 
 void GLTFDemo::run()
 {
 	initWindow();
-	initVulkan();
+	
 	mainLoop();
-	cleanUp();
+	
 }
 
-void GLTFDemo::initVulkan()
-{
-	createInstance();
-}
 
 void GLTFDemo::mainLoop()
 {
@@ -34,7 +30,7 @@ void GLTFDemo::mainLoop()
 
 void GLTFDemo::cleanUp()
 {
-	vkDestroyInstance(m_instance, nullptr);
+	m_vulkanRenderSystem->cleanUp();
 
 	glfwDestroyWindow(m_window);
 
@@ -46,10 +42,7 @@ void GLTFDemo::initWindow()
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	m_window = glfwCreateWindow(800, 600, "gltf window", nullptr, nullptr);
-}
 
-void GLTFDemo::createInstance()
-{
 	VkApplicationInfo appInfo{};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pApplicationName = "gltf window";
@@ -71,12 +64,6 @@ void GLTFDemo::createInstance()
 	createInfo.ppEnabledExtensionNames = glfwExtension;
 	createInfo.enabledLayerCount = 0;
 
-	if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to create vulkan instance\n");
-	}
-	else
-	{
-		std::cout << "xxxxxx" << std::endl;
-	}
+	m_vulkanRenderSystem->setInstanceCreatInfo(createInfo);
+	m_vulkanRenderSystem->creatInstance();
 }
