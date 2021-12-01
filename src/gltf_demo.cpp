@@ -1,4 +1,5 @@
 #include "gltf_demo.h"
+#include "GLFW/glfw3native.h"
 
 GLTFDemo::GLTFDemo()
 {
