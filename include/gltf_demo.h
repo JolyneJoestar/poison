@@ -4,7 +4,6 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <stdexcept>
 #include <stdlib.h>
@@ -19,9 +18,9 @@ public:
 	void run();
 
 private:
-	void mainLoop();
-	void cleanUp();
-	void initWindow();
+	void _mainLoop();
+	void _cleanUp();
+	void _initWindow();
 
 private:
 	GLFWwindow* m_window;

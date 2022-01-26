@@ -4,7 +4,7 @@
 GLTFDemo::GLTFDemo()
 {
 	m_window = nullptr;
-	m_vulkanRenderSystem = new rs::VulkanRenderSystem;
+	m_vulkanRenderSystem = new rs::VulkanRenderSystem();
 }
 
 GLTFDemo::~GLTFDemo()
@@ -14,14 +14,13 @@ GLTFDemo::~GLTFDemo()
 
 void GLTFDemo::run()
 {
-	initWindow();
-	
-	mainLoop();
+	_initWindow();
+	_mainLoop();
 	
 }
 
 
-void GLTFDemo::mainLoop()
+void GLTFDemo::_mainLoop()
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
@@ -29,7 +28,7 @@ void GLTFDemo::mainLoop()
 	}
 }
 
-void GLTFDemo::cleanUp()
+void GLTFDemo::_cleanUp()
 {
 	m_vulkanRenderSystem->cleanUp();
 
@@ -38,33 +37,19 @@ void GLTFDemo::cleanUp()
 	glfwTerminate();
 }
 
-void GLTFDemo::initWindow()
+void GLTFDemo::_initWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	m_window = glfwCreateWindow(800, 600, "gltf window", nullptr, nullptr);
 
-	VkApplicationInfo appInfo{};
-	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pApplicationName = "gltf window";
-	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.pEngineName = "No ENngine";
-	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_0;
-
-	VkInstanceCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.pApplicationInfo = &appInfo;
 
 	uint32_t glfwExtensionCount;
 	const char** glfwExtension;
 
 	glfwExtension = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-	createInfo.enabledExtensionCount = glfwExtensionCount;
-	createInfo.ppEnabledExtensionNames = glfwExtension;
-	createInfo.enabledLayerCount = 0;
-
-	m_vulkanRenderSystem->setInstanceCreatInfo(createInfo);
+	m_vulkanRenderSystem->setExtension(glfwExtension);
+	m_vulkanRenderSystem->setExtensionCount(glfwExtensionCount);
 	m_vulkanRenderSystem->creatInstance();
 }

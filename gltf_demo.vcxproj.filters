@@ -26,7 +26,7 @@
     <ClInclude Include="include\gltf_demo.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="src\vulkan_render_system.h">
+    <ClInclude Include="include\vulkan_render_system.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

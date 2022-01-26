@@ -25,7 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gltf_demo.h" />
-    <ClInclude Include="src\vulkan_render_system.h" />
+    <ClInclude Include="include\vulkan_render_system.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E59F5A92-A633-4754-A77D-357722316631}</ProjectGuid>
@@ -64,6 +64,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>include;$(VULKAN_SDK)/include;$(IncludePath)</IncludePath>
     <LibraryPath>libs;$(VULKAN_SDK)/Lib;$(VULKAN_SDK)/Lib32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>.\include;$(VK_SDK_PATH)\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
