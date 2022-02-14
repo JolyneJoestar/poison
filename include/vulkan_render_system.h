@@ -24,19 +24,25 @@ namespace rs
 		void cleanUp();
 
 
-		bool checkValidationLayerSupport();
 
+
+		void pickPhysicalDevice();
 		//Extensions
 		void setExtensionCount(uint32_t count) { m_extensionCount = count; }
 		void setExtension(const char** extension) { m_extension = extension; }
 
-		//Debug
-		void setupDebugMessenger();
 	private:
 		void _initVulkan();
-		void _pickPhysicalDevice();
+		bool _isDeviceSuitable(VkPhysicalDevice device);
+		
+
 		void _creatSurface();
 		void _creatSurface_creatSurface();
+
+		//Debug
+		void _setupDebugMessenger();
+		bool _checkValidationLayerSupport();
+
 		VkResult _createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 
 		VkApplicationInfo m_appInfo;

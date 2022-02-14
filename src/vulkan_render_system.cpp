@@ -46,21 +46,44 @@ namespace rs
 		}
 	}
 
-	void VulkanRenderSystem::_pickPhysicalDevice()
+	bool VulkanRenderSystem::_isDeviceSuitable(VkPhysicalDevice device)
 	{
-		
+		VkPhysicalDeviceProperties deviceProperties;
+		vkGetPhysicalDeviceProperties(device, &deviceProperties);
+		VkPhysicalDeviceFeatures deviceFeatures;
+		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+		return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+			&& deviceFeatures.geometryShader;
+	}
+
+	void VulkanRenderSystem::pickPhysicalDevice()
+	{
 		vkEnumeratePhysicalDevices(m_instance, &m_deviceCount, nullptr);
 		if (m_deviceCount == 0)
 		{
 			printf("there is no valid Vulkan physical device\n");
 			return;
 		}
+		VkPhysicalDevice physicalDevice;
 		m_devices.resize(m_deviceCount);
 		vkEnumeratePhysicalDevices(m_instance, &m_deviceCount, m_devices.data());
+		for (const auto& device : m_devices)
+		{
+			if (_isDeviceSuitable(device))
+			{
+				std::cout << "device handle is" << device << std::endl;
+				physicalDevice = device;
+				break;
+			}
+		}
+		if (physicalDevice == VK_NULL_HANDLE)
+			throw std::runtime_error("failed to find a suitable GPU");
 	}
 
 	void VulkanRenderSystem::_creatSurface_creatSurface()
 	{
+		
 //		VkWin32SurfaceCreateInfoKHR sufaceCreateInfo = {};
 //		sufaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_KHR;
 	}
@@ -98,11 +121,12 @@ namespace rs
 		{
 			printf("Vulkan init failed\n");
 		}
-		if (enableValidationLayers && !checkValidationLayerSupport())
+		if (enableValidationLayers && !_checkValidationLayerSupport())
 		{
 			throw std::runtime_error("validation layers request,but not available!");
 		}
-		setupDebugMessenger();
+		_setupDebugMessenger();
+		std::cout << "creat instance." << std::endl;
 	}
 
 	void VulkanRenderSystem::cleanUp()
@@ -110,7 +134,7 @@ namespace rs
 		vkDestroyInstance(m_instance, nullptr);
 	}
 
-	bool VulkanRenderSystem::checkValidationLayerSupport()
+	bool VulkanRenderSystem::_checkValidationLayerSupport()
 	{
 		vkEnumerateInstanceLayerProperties(&m_layerCount, nullptr);
 		std::vector<VkLayerProperties> availableLayers(m_layerCount);
@@ -130,11 +154,15 @@ namespace rs
 				std::cout << validationLayerName << "is not supported" << std::endl;
 				return false;
 			}
+			else
+			{
+				std::cout << validationLayerName << "is supported" << std::endl;
+			}
 		}
 		return true;
 	}
 
-	void VulkanRenderSystem::setupDebugMessenger()
+	void VulkanRenderSystem::_setupDebugMessenger()
 	{
 		if (!enableValidationLayers)
 			return;
@@ -148,6 +176,7 @@ namespace rs
 			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 		createInfo.pfnUserCallback = debugCallback;
 		createInfo.pUserData = nullptr;
+		std::cout << "set up debug messenger." << std::endl;
 	}
 
 }

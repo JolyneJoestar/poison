@@ -15,6 +15,7 @@ GLTFDemo::~GLTFDemo()
 void GLTFDemo::run()
 {
 	_initWindow();
+	_initGraphicsContext();
 	_mainLoop();
 	
 }
@@ -41,9 +42,10 @@ void GLTFDemo::_initWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	m_window = glfwCreateWindow(800, 600, "gltf window", nullptr, nullptr);
+	m_window = glfwCreateWindow(1200, 800, "gltf window", nullptr, nullptr);
 
-
+void GLTFDemo::_initGraphicsContext()
+{
 	uint32_t glfwExtensionCount;
 	const char** glfwExtension;
 
@@ -52,4 +54,5 @@ void GLTFDemo::_initWindow()
 	m_vulkanRenderSystem->setExtension(glfwExtension);
 	m_vulkanRenderSystem->setExtensionCount(glfwExtensionCount);
 	m_vulkanRenderSystem->creatInstance();
+	m_vulkanRenderSystem->pickPhysicalDevice();
 }

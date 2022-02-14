@@ -21,6 +21,7 @@ private:
 	void _mainLoop();
 	void _cleanUp();
 	void _initWindow();
+	void _initGraphicsContext();
 
 private:
 	GLFWwindow* m_window;
