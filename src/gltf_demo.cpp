@@ -1,30 +1,27 @@
 #include "gltf_demo.h"
+#include "GLFW/glfw3native.h"
 
 GLTFDemo::GLTFDemo()
 {
 	m_window = nullptr;
-	m_instance = NULL;
+	m_vulkanRenderSystem = new rs::VulkanRenderSystem();
 }
 
 GLTFDemo::~GLTFDemo()
 {
-
+	delete m_vulkanRenderSystem;
 }
 
 void GLTFDemo::run()
 {
-	initWindow();
-	initVulkan();
-	mainLoop();
-	cleanUp();
+	_initWindow();
+	_initGraphicsContext();
+	_mainLoop();
+	
 }
 
-void GLTFDemo::initVulkan()
-{
-	createInstance();
-}
 
-void GLTFDemo::mainLoop()
+void GLTFDemo::_mainLoop()
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
@@ -32,51 +29,31 @@ void GLTFDemo::mainLoop()
 	}
 }
 
-void GLTFDemo::cleanUp()
+void GLTFDemo::_cleanUp()
 {
-	vkDestroyInstance(m_instance, nullptr);
+	m_vulkanRenderSystem->cleanUp();
 
 	glfwDestroyWindow(m_window);
 
 	glfwTerminate();
 }
 
-void GLTFDemo::initWindow()
+void GLTFDemo::_initWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	m_window = glfwCreateWindow(800, 600, "gltf window", nullptr, nullptr);
+	m_window = glfwCreateWindow(1200, 800, "gltf window", nullptr, nullptr);
 }
 
-void GLTFDemo::createInstance()
+void GLTFDemo::_initGraphicsContext()
 {
-	VkApplicationInfo appInfo{};
-	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pApplicationName = "gltf window";
-	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.pEngineName = "No ENngine";
-	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_0;
-
-	VkInstanceCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.pApplicationInfo = &appInfo;
-
 	uint32_t glfwExtensionCount;
 	const char** glfwExtension;
 
 	glfwExtension = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-	createInfo.enabledExtensionCount = glfwExtensionCount;
-	createInfo.ppEnabledExtensionNames = glfwExtension;
-	createInfo.enabledLayerCount = 0;
-
-	if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to create vulkan instance\n");
-	}
-	else
-	{
-		std::cout << "xxxxxx" << std::endl;
-	}
+	m_vulkanRenderSystem->setExtension(glfwExtension);
+	m_vulkanRenderSystem->setExtensionCount(glfwExtensionCount);
+	m_vulkanRenderSystem->creatInstance();
+	m_vulkanRenderSystem->pickPhysicalDevice();
 }

@@ -4,10 +4,10 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <stdexcept>
 #include <stdlib.h>
+#include "vulkan_render_system.h"
 
 class GLTFDemo
 {
@@ -18,13 +18,12 @@ public:
 	void run();
 
 private:
-	void initVulkan();
-	void mainLoop();
-	void cleanUp();
-	void initWindow();
-	void createInstance();
+	void _mainLoop();
+	void _cleanUp();
+	void _initWindow();
+	void _initGraphicsContext();
 
 private:
 	GLFWwindow* m_window;
-	VkInstance m_instance;
+	rs::VulkanRenderSystem* m_vulkanRenderSystem;
 };
