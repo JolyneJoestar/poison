@@ -49,6 +49,7 @@ namespace rs
 		{
 			m_instanceCreatInfo.enabledLayerCount = 0;
 		}
+		std::cout << "creat instance." << std::endl;
 	}
 
 	bool VulkanRenderSystem::_isDeviceSuitable(VkPhysicalDevice device)
@@ -254,7 +255,7 @@ namespace rs
 		vertexInputInfo.pVertexBindingDescriptions = nullptr;
 		vertexInputInfo.vertexAttributeDescriptionCount = 0;
 		vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-
+		
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -344,6 +345,28 @@ namespace rs
 			throw std::runtime_error("failed to create pipeline layout!");
 		}
 
+		VkGraphicsPipelineCreateInfo graphicsPiplineInfo{};
+		graphicsPiplineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		graphicsPiplineInfo.stageCount = 2;
+		graphicsPiplineInfo.pStages = shaderStages;
+		graphicsPiplineInfo.pVertexInputState = &vertexInputInfo;
+		graphicsPiplineInfo.pInputAssemblyState = &inputAssembly;
+		graphicsPiplineInfo.pViewportState = &viewportState;
+		graphicsPiplineInfo.pRasterizationState = &rasterizer;
+		graphicsPiplineInfo.pMultisampleState = &multisampling;
+		graphicsPiplineInfo.pColorBlendState = &colorBlend;
+		graphicsPiplineInfo.pDynamicState = nullptr;
+		graphicsPiplineInfo.layout = m_pipelineLayout;
+		graphicsPiplineInfo.subpass = 0;
+		graphicsPiplineInfo.basePipelineHandle = VK_NULL_HANDLE;
+		graphicsPiplineInfo.basePipelineIndex = -1;
+
+		if (vkCreateGraphicsPipelines(m_logicDevice, VK_NULL_HANDLE, 1, &graphicsPiplineInfo, nullptr,
+			&m_graphicsPipline) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create graphics pipline!");
+		}
+
 		vkDestroyShaderModule(m_logicDevice, vertShaderModule, nullptr);
 		vkDestroyShaderModule(m_logicDevice, fragShaderModule, nullptr);
 	}
@@ -377,6 +400,103 @@ namespace rs
 		if (vkCreateRenderPass(m_logicDevice, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create render pass");
+		}
+		printf("create render pass successed!\n");
+	}
+
+	void VulkanRenderSystem::createFramebuffers()
+	{
+		m_swapChainFramebuffers.resize(m_swapChainimageViews.size());
+
+		for (size_t i = 0; i < m_swapChainimageViews.size(); i++)
+		{
+			VkImageView attachments[] = { m_swapChainimageViews[i] };
+			VkFramebufferCreateInfo framebufferInfo{};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = m_renderPass;
+			framebufferInfo.attachmentCount = 1;
+			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.width = m_swapChainExtent.width;
+			framebufferInfo.height = m_swapChainExtent.height;
+			framebufferInfo.layers = 1;
+
+			if (vkCreateFramebuffer(m_logicDevice, &framebufferInfo, nullptr, &m_swapChainFramebuffers[i])
+				!= VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create framebuffer!");
+			}
+		}
+	}
+
+	void VulkanRenderSystem::createCommandPool()
+	{
+		QueueFamiliesIndices queueFameliyIndices = _findQueueFamilies(m_physicalDevice);
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = queueFameliyIndices.graphicsFamily.value();
+		poolInfo.flags = 0;
+
+		if (vkCreateCommandPool(m_logicDevice, &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create command pool!");
+		}
+	}
+
+	void VulkanRenderSystem::createCommandBuffers()
+	{
+		m_commandBuffers.resize(m_swapChainFramebuffers.size());
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = m_commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = (uint32_t)m_commandBuffers.size();
+		if (vkAllocateCommandBuffers(m_logicDevice, &allocInfo, m_commandBuffers.data()) != VK_SUCCESS)
+		{
+			throw std::runtime_error("faild to allocate command buffers!");
+		}
+		for (size_t i = 0; i < m_commandBuffers.size(); i++)
+		{
+			VkCommandBufferBeginInfo beginInfo{};
+			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			beginInfo.flags = 0;
+			beginInfo.pInheritanceInfo = nullptr;
+			
+			if (vkBeginCommandBuffer(m_commandBuffers[i], &beginInfo) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to begin recording command buffer!");
+			}
+
+			VkRenderPassBeginInfo renderPassInfo{};
+			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			renderPassInfo.renderPass = m_renderPass;
+			renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
+			renderPassInfo.renderArea.offset = { 0,0 };
+			renderPassInfo.renderArea.extent = m_swapChainExtent;
+
+			VkClearValue clearColor = { 0.0f,0.0f, 0.0f, 1.0f };
+			renderPassInfo.clearValueCount = 1;
+			renderPassInfo.pClearValues = &clearColor;
+			vkCmdBeginRenderPass(m_commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+			vkCmdBindPipeline(m_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipline);
+			vkCmdDraw(m_commandBuffers[i], 3, 1, 0, 0);
+			vkCmdEndRenderPass(m_commandBuffers[i]);
+			if (vkEndCommandBuffer(m_commandBuffers[i]) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to record command buffer!");
+			}
+		}
+
+	}
+
+	void VulkanRenderSystem::createSemaphores()
+	{
+		VkSemaphoreCreateInfo semaphoreInfo{};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		if (vkCreateSemaphore(m_logicDevice, &semaphoreInfo, nullptr, &m_imageAvailableSemaphore)
+			!= VK_SUCCESS || vkCreateSemaphore(m_logicDevice, &semaphoreInfo, nullptr, &m_renderFinishedSemaphore)
+			!= VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create semaphores!");
 		}
 	}
 
@@ -479,13 +599,13 @@ namespace rs
 		m_appInfo{}
 	{
 		m_deviceCount = 0;
-		m_extension = NULL;
+		m_extension = nullptr;
 		m_extensionCount = 0;
 	}
 
 	VulkanRenderSystem::~VulkanRenderSystem()
 	{
-		cleanUp();
+		_cleanUp();
 	}
 
 	void VulkanRenderSystem::creatInstance()
@@ -504,19 +624,27 @@ namespace rs
 		std::cout << "creat instance." << std::endl;
 	}
 
-	void VulkanRenderSystem::cleanUp()
+	void VulkanRenderSystem::_cleanUp()
 	{
-		vkDestroyPipelineLayout(m_logicDevice, m_pipelineLayout, nullptr);
+		//vkDestroySemaphore(m_logicDevice, m_renderFinishedSemaphore, nullptr);
+		//vkDestroySemaphore(m_logicDevice, m_imageAvailableSemaphore, nullptr);
+		//vkDestroyCommandPool(m_logicDevice, m_commandPool, nullptr);
+		//for (auto framebuffer : m_swapChainFramebuffers)
+		//{
+		//	vkDestroyFramebuffer(m_logicDevice, framebuffer, nullptr);
+		//}
+		//vkDestroyPipeline(m_logicDevice, m_graphicsPipline, nullptr);
+//		vkDestroyPipelineLayout(m_logicDevice, m_pipelineLayout, nullptr);
 		vkDestroyRenderPass(m_logicDevice, m_renderPass, nullptr);
-		for (auto imageView : m_swapChainimageViews)
-		{
-			vkDestroyImageView(m_logicDevice, imageView, nullptr);
-		}
+		//for (auto imageView : m_swapChainimageViews)
+		//{
+		//	vkDestroyImageView(m_logicDevice, imageView, nullptr);
+		//}
 		vkDestroySwapchainKHR(m_logicDevice, m_swapChain, nullptr);
-		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyDevice(m_logicDevice, nullptr);
+		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
-
+		
 	}
 
 	void VulkanRenderSystem::createLogicalDevice()

@@ -66,7 +66,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>include;$(VULKAN_SDK)/include;$(IncludePath)</IncludePath>
-    <LibraryPath>libs;$(VULKAN_SDK)/Lib;$(VULKAN_SDK)/Lib32;$(LibraryPath)</LibraryPath>
+    <LibraryPath>libs;$(VULKAN_SDK)/Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>.\include;$(VK_SDK_PATH)\include;$(IncludePath)</IncludePath>
@@ -101,6 +101,7 @@
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

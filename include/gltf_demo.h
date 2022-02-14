@@ -14,6 +14,7 @@ public:
 	void run();
 
 private:
+	void _drawFrame();
 	void _mainLoop();
 	void _cleanUp();
 	void _initWindow();

@@ -49,7 +49,7 @@ namespace rs
 		~VulkanRenderSystem();
 		void setInstanceCreatInfo(VkInstanceCreateInfo &instanceCreatInfo) { m_instanceCreatInfo = instanceCreatInfo; }
 		void creatInstance();
-		void cleanUp();
+		void _cleanUp();
 
 		void createLogicalDevice();
 
@@ -63,6 +63,14 @@ namespace rs
 		void createGraphicsPipeline();
 
 		void createRenderPass();
+
+		void createFramebuffers();
+
+		void createCommandPool();
+
+		void createCommandBuffers();
+
+		void createSemaphores();
 		//Extensions
 		void setExtensionCount(uint32_t count) { m_extensionCount = count; }
 		void setExtension(const char** extension) { m_extension = extension; }
@@ -128,8 +136,21 @@ namespace rs
 		//pipeline
 		VkPipelineLayout m_pipelineLayout;
 
-		//Renderpass
+		//Render pass
 		VkRenderPass m_renderPass;
 		VkPipelineLayout pipelineLayout;
+		VkPipeline m_graphicsPipline;
+
+		//frame buffer
+		std::vector<VkFramebuffer> m_swapChainFramebuffers;
+
+		//command pool
+		VkCommandPool m_commandPool;
+		std::vector<VkCommandBuffer> m_commandBuffers;
+
+		//Semaphores
+		VkSemaphore m_imageAvailableSemaphore;
+		VkSemaphore m_renderFinishedSemaphore;
+
 	};
 }

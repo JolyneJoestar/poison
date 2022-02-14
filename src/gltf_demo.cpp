@@ -4,12 +4,12 @@
 GLTFDemo::GLTFDemo()
 {
 	m_window = nullptr;
-	m_vulkanRenderSystem = new rs::VulkanRenderSystem();
+	m_vulkanRenderSystem = nullptr;
 }
 
 GLTFDemo::~GLTFDemo()
 {
-	delete m_vulkanRenderSystem;
+	_cleanUp();
 }
 
 void GLTFDemo::run()
@@ -21,17 +21,23 @@ void GLTFDemo::run()
 }
 
 
+void GLTFDemo::_drawFrame()
+{
+
+}
+
 void GLTFDemo::_mainLoop()
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glfwPollEvents();
+		_drawFrame();
 	}
 }
 
 void GLTFDemo::_cleanUp()
 {
-	m_vulkanRenderSystem->cleanUp();
+	delete m_vulkanRenderSystem;
 
 	glfwDestroyWindow(m_window);
 
@@ -43,7 +49,14 @@ void GLTFDemo::_initWindow()
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	m_window = glfwCreateWindow(1200, 800, "gltf window", nullptr, nullptr);
+	if (m_window == nullptr)
+	{
+		m_window = glfwCreateWindow(rs::WIDTH, rs::HEIGHT, "gltf window", nullptr, nullptr);
+	}
+	if (m_vulkanRenderSystem == nullptr)
+	{
+		m_vulkanRenderSystem = new rs::VulkanRenderSystem();
+	}
 }
 
 void GLTFDemo::_initGraphicsContext()
@@ -64,4 +77,5 @@ void GLTFDemo::_initGraphicsContext()
 	m_vulkanRenderSystem->createImageViews();
 	m_vulkanRenderSystem->createRenderPass();
 	m_vulkanRenderSystem->createGraphicsPipeline();
+	//m_vulkanRenderSystem->createFramebuffers();
 }

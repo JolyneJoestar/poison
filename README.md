@@ -1,2 +1,1 @@
-# poison
-好想做游戏
+This project refers to the  <<vulkan tutorial>> and is used for learning vulkan。
