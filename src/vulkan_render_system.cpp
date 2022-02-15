@@ -1,5 +1,7 @@
 #include "vulkan_render_system.h"
 #include <iostream>
+#include <map>
+#include <set>
 
 namespace rs
 {
@@ -48,44 +50,75 @@ namespace rs
 
 	bool VulkanRenderSystem::_isDeviceSuitable(VkPhysicalDevice device)
 	{
+		QueueFamiliesIndices indices = findQueueFamilies(device);
+		bool extensionsSurpported = _checkDeviceExtensionSupport(device);
+		return indices.isComplete() && extensionsSurpported;
+	}
+
+	int VulkanRenderSystem::_rateDeviceSuitability(VkPhysicalDevice device)
+	{
+		int score = 0;
 		VkPhysicalDeviceProperties deviceProperties;
 		vkGetPhysicalDeviceProperties(device, &deviceProperties);
 		VkPhysicalDeviceFeatures deviceFeatures;
 		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-		return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-			&& deviceFeatures.geometryShader;
+		if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+		{
+			score += 1000;
+		}
+
+		score += deviceProperties.limits.maxImageDimension2D;
+
+		if (deviceFeatures.geometryShader)
+			score += 1000;
+
+		return score;
+
+	}
+
+	void VulkanRenderSystem::_creatSurface()
+	{
+
 	}
 
 	void VulkanRenderSystem::pickPhysicalDevice()
 	{
+		std::multimap<int, VkPhysicalDevice> candidates;
+
 		vkEnumeratePhysicalDevices(m_instance, &m_deviceCount, nullptr);
 		if (m_deviceCount == 0)
 		{
 			printf("there is no valid Vulkan physical device\n");
 			return;
 		}
-		VkPhysicalDevice physicalDevice;
-		m_devices.resize(m_deviceCount);
-		vkEnumeratePhysicalDevices(m_instance, &m_deviceCount, m_devices.data());
-		for (const auto& device : m_devices)
+		m_physicalDevices.resize(m_deviceCount);
+		vkEnumeratePhysicalDevices(m_instance, &m_deviceCount, m_physicalDevices.data());
+		for (const auto& device : m_physicalDevices)
 		{
-			if (_isDeviceSuitable(device))
-			{
-				std::cout << "device handle is" << device << std::endl;
-				physicalDevice = device;
-				break;
-			}
+			//if (_isDeviceSuitable(device))
+			//{
+			//	std::cout << "device handle is" << device << std::endl;
+			//	physicalDevice = device;
+			//	break;
+			//}
+			int score = _rateDeviceSuitability(device);
+			candidates.insert(std::make_pair(score, device));
 		}
-		if (physicalDevice == VK_NULL_HANDLE)
+		//if (physicalDevice == VK_NULL_HANDLE)
+		if (candidates.rbegin()->first > 0)
+		{
+			m_physicalDevice = candidates.rbegin()->second;
+		}
+		else
 			throw std::runtime_error("failed to find a suitable GPU");
 	}
 
-	void VulkanRenderSystem::_creatSurface_creatSurface()
+	rs::SwapChainSupportDetails VulkanRenderSystem::querySwapChainSupport(VkPhysicalDevice device)
 	{
-		
-//		VkWin32SurfaceCreateInfoKHR sufaceCreateInfo = {};
-//		sufaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_KHR;
+		SwapChainSupportDetails details;
+		//vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface);
+		return details;
 	}
 
 	VkResult VulkanRenderSystem::_createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
@@ -131,18 +164,58 @@ namespace rs
 
 	void VulkanRenderSystem::cleanUp()
 	{
+		vkDestroyDevice(m_logicDevice, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
+
+	}
+
+	void VulkanRenderSystem::createLogicalDevice()
+	{
+		QueueFamiliesIndices indices = findQueueFamilies(m_physicalDevice);
+
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+		queueCreateInfo.queueCount = 1;
+		float queuePriority = 1.0;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+		VkPhysicalDeviceFeatures deviceFeatures{};
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.pQueueCreateInfos = &queueCreateInfo;
+		createInfo.queueCreateInfoCount = 1;
+		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+		if (enableValidationLayers)
+		{
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayerNames.size());
+			createInfo.ppEnabledLayerNames = validationLayerNames.data();
+		}
+		else
+		{
+			createInfo.enabledLayerCount = 0;
+		}
+
+		if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_logicDevice) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create logical device");
+		}
+		vkGetDeviceQueue(m_logicDevice, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
+
 	}
 
 	bool VulkanRenderSystem::_checkValidationLayerSupport()
 	{
 		vkEnumerateInstanceLayerProperties(&m_layerCount, nullptr);
-		std::vector<VkLayerProperties> availableLayers(m_layerCount);
-		vkEnumerateInstanceLayerProperties(&m_layerCount, availableLayers.data());
+		std::vector<VkLayerProperties> validationLayers;
+		validationLayers.resize(m_layerCount);
+		vkEnumerateInstanceLayerProperties(&m_layerCount, validationLayers.data());
 		for (auto validationLayerName : validationLayerNames)
 		{
 			bool support = false;
-			for (auto supportedLayerName : availableLayers)
+			for (auto supportedLayerName : validationLayers)
 			{
 				if (strcmp(validationLayerName, supportedLayerName.layerName) == 0)
 				{
@@ -160,6 +233,44 @@ namespace rs
 			}
 		}
 		return true;
+	}
+
+	bool VulkanRenderSystem::_checkDeviceExtensionSupport(VkPhysicalDevice device)
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availabeExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availabeExtensions.data());
+
+		std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+		for (const auto& extension : availabeExtensions)
+		{
+			requiredExtensions.erase(extension.extensionName);
+		}
+
+		return requiredExtensions.empty();
+	}
+
+	QueueFamiliesIndices VulkanRenderSystem::findQueueFamilies(VkPhysicalDevice device)
+	{
+		QueueFamiliesIndices indices;
+
+		uint32_t queueFamilyCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+		int i = 0;
+		for (const auto& queueFamily : queueFamilies)
+		{
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			{
+				indices.graphicsFamily = i;
+			}
+			i++;
+		}
+		return indices;
 	}
 
 	void VulkanRenderSystem::_setupDebugMessenger()

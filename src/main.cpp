@@ -13,14 +13,14 @@ int main()
 	glm::mat4 matrix;
 	glm::vec4 vec;
 	auto test = matrix * vec;
-	//try
-	//{
-	gltfDemo.run();
-	//}
-	//catch (const std::exception& e)
-	//{
-	//	std::cerr << e.what() << std::endl;
-	//	return EXIT_FAILURE;
-	//}
+	try
+	{
+		gltfDemo.run();
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
