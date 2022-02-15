@@ -1,5 +1,5 @@
 #include "gltf_demo.h"
-#include "GLFW/glfw3native.h"
+
 
 GLTFDemo::GLTFDemo()
 {
@@ -42,6 +42,7 @@ void GLTFDemo::_initWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	m_window = glfwCreateWindow(1200, 800, "gltf window", nullptr, nullptr);
 }
 
@@ -56,4 +57,5 @@ void GLTFDemo::_initGraphicsContext()
 	m_vulkanRenderSystem->setExtensionCount(glfwExtensionCount);
 	m_vulkanRenderSystem->creatInstance();
 	m_vulkanRenderSystem->pickPhysicalDevice();
+	m_vulkanRenderSystem->createLogicalDevice();
 }
