@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\shader_utils.h" />
     <ClCompile Include="src\gltf_demo.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\shader_utils.cpp" />
     <ClCompile Include="src\vulkan_render_system.cpp" />
   </ItemGroup>
   <ItemGroup>

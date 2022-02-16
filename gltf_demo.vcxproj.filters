@@ -21,6 +21,12 @@
     <ClCompile Include="src\vulkan_render_system.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="include\shader_utils.h">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader_utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gltf_demo.h">

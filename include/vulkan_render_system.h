@@ -5,13 +5,16 @@
 #include <windows.h>
 #include <fcntl.h>
 #include <io.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
 #endif
 
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <optional>
+
 #include <GLFW/glfw3.h>
-#include "GLFW/glfw3native.h"
+
+//#define  NDDEBUG
 
 namespace rs
 {
@@ -27,9 +30,9 @@ namespace rs
 
 	struct QueueFamiliesIndices {
 		std::optional<uint32_t> graphicsFamily;
-
+		std::optional<uint32_t> presentFamily;
 		bool isComplete() {
-			return graphicsFamily.has_value();
+			return graphicsFamily.has_value() && presentFamily.has_value();
 		}
 	};
 
@@ -52,10 +55,17 @@ namespace rs
 
 
 		void pickPhysicalDevice();
+
+		void createSwapChain();
+
+		void createImageViews();
+
+		void createGraphicsPipeline();
 		//Extensions
 		void setExtensionCount(uint32_t count) { m_extensionCount = count; }
 		void setExtension(const char** extension) { m_extension = extension; }
 
+		void setSurfaceHandle(GLFWwindow* window);
 	private:
 		void _initVulkan();
 		bool _isDeviceSuitable(VkPhysicalDevice device);
@@ -69,9 +79,17 @@ namespace rs
 		bool _checkValidationLayerSupport();
 		bool _checkDeviceExtensionSupport(VkPhysicalDevice device);
 
-		QueueFamiliesIndices findQueueFamilies(VkPhysicalDevice device);
+		QueueFamiliesIndices _findQueueFamilies(VkPhysicalDevice device);
 
 		VkResult _createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
+
+		//surface && swapChain
+		VkSurfaceFormatKHR _chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+		VkPresentModeKHR _chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+		VkExtent2D _chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+
+		//shaderModule
+		VkShaderModule _createShaderModule(const std::vector<char>& code);
 
 		VkApplicationInfo m_appInfo;
 		VkSurfaceKHR m_vkSurface;
@@ -79,13 +97,31 @@ namespace rs
 		VkInstance m_instance;
 		uint32_t m_deviceCount;
 		uint32_t m_layerCount;
+
+
+		//devices
 		std::vector<VkPhysicalDevice> m_physicalDevices;
 		VkPhysicalDevice m_physicalDevice;
 		VkDevice m_logicDevice;
+
+		//queue
 		VkQueue m_graphicsQueue;
 
 		//Extension
 		uint32_t m_extensionCount;
 		const char** m_extension;
+
+		//surface 
+		GLFWwindow* m_window;
+		VkSurfaceKHR m_surface;
+
+		//swap chain
+		VkSwapchainKHR m_swapChain;
+		VkFormat m_swapChainImageFormat;
+		VkExtent2D m_swapChainExtent;
+
+		std::vector<VkImage> m_swapChainImages;
+		std::vector<VkImageView> m_swapChainimageViews;
+
 	};
 }

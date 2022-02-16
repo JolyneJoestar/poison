@@ -54,7 +54,10 @@ void GLTFDemo::_initGraphicsContext()
 
 	m_vulkanRenderSystem->setExtension(glfwExtension);
 	m_vulkanRenderSystem->setExtensionCount(glfwExtensionCount);
+	m_vulkanRenderSystem->setSurfaceHandle(m_window);
 	m_vulkanRenderSystem->creatInstance();
+
 	m_vulkanRenderSystem->pickPhysicalDevice();
 	m_vulkanRenderSystem->createLogicalDevice();
+	m_vulkanRenderSystem->createSwapChain();
 }
