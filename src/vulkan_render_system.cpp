@@ -2,6 +2,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <vulkan/vulkan_win32.h>
 
 namespace rs
 {
@@ -79,7 +80,7 @@ namespace rs
 
 	void VulkanRenderSystem::_creatSurface()
 	{
-
+		VkWin32SurfaceCreateInfoKHR createInfo{};
 	}
 
 	void VulkanRenderSystem::pickPhysicalDevice()
