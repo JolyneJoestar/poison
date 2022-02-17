@@ -21,6 +21,5 @@ namespace rs
 
 		return buffer;
 	}
-
 }
 
