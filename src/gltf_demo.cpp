@@ -60,4 +60,5 @@ void GLTFDemo::_initGraphicsContext()
 	m_vulkanRenderSystem->pickPhysicalDevice();
 	m_vulkanRenderSystem->createLogicalDevice();
 	m_vulkanRenderSystem->createSwapChain();
+	m_vulkanRenderSystem->createImageViews();
 }

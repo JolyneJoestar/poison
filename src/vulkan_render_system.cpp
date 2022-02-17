@@ -259,6 +259,14 @@ namespace rs
 		inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		inputAssembly.primitiveRestartEnable = VK_FALSE;
 
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = (float)m_swapChainExtent.width;
+		viewport.height = (float)m_swapChainExtent.height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+
 		vkDestroyShaderModule(m_logicDevice, vertShaderModule, nullptr);
 		vkDestroyShaderModule(m_logicDevice, fragShaderModule, nullptr);
 	}
