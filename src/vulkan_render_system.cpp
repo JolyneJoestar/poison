@@ -129,6 +129,7 @@ namespace rs
 		}
 		else
 			throw std::runtime_error("failed to find a suitable GPU");
+		std::cout << "pick physical device successed!" << std::endl;
 	}
 
 	void VulkanRenderSystem::createSwapChain()
@@ -226,8 +227,8 @@ namespace rs
 
 	void VulkanRenderSystem::createGraphicsPipeline()
 	{
-		auto vertShaderCode = ShaderUtils::readFile("shader/vert.spv");
-		auto fragShaderCode = ShaderUtils::readFile("shader/frag.spv");
+		auto vertShaderCode = ShaderUtils::readFile("src/shaders/vert.spv");
+		auto fragShaderCode = ShaderUtils::readFile("src/shaders/frag.spv");
 
 		VkShaderModule vertShaderModule = _createShaderModule(vertShaderCode);
 		VkShaderModule fragShaderModule = _createShaderModule(fragShaderCode);
@@ -366,7 +367,8 @@ namespace rs
 		return shaderModule;
 	}
 
-	VulkanRenderSystem::VulkanRenderSystem()
+	VulkanRenderSystem::VulkanRenderSystem():
+		m_appInfo{}
 	{
 		m_deviceCount = 0;
 		m_extension = NULL;
@@ -453,7 +455,7 @@ namespace rs
 		for (auto validationLayerName : validationLayerNames)
 		{
 			bool support = false;
-			for (auto supportedLayerName : validationLayers)
+			for (const auto& supportedLayerName : validationLayers)
 			{
 				if (strcmp(validationLayerName, supportedLayerName.layerName) == 0)
 				{
@@ -493,7 +495,7 @@ namespace rs
 
 	QueueFamiliesIndices VulkanRenderSystem::_findQueueFamilies(VkPhysicalDevice device)
 	{
-		QueueFamiliesIndices indices;
+		QueueFamiliesIndices indices{0,0};
 
 		uint32_t queueFamilyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -508,6 +510,7 @@ namespace rs
 			}
 			i++;
 		}
+
 		VkBool32 presentSupport = false;
 		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface, &presentSupport);
 		if (presentSupport)
