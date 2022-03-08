@@ -61,6 +61,8 @@ namespace rs
 		void createImageViews();
 
 		void createGraphicsPipeline();
+
+		void createRenderPass();
 		//Extensions
 		void setExtensionCount(uint32_t count) { m_extensionCount = count; }
 		void setExtension(const char** extension) { m_extension = extension; }
@@ -122,6 +124,9 @@ namespace rs
 
 		std::vector<VkImage> m_swapChainImages;
 		std::vector<VkImageView> m_swapChainimageViews;
+
+		//pipeline
+		VkPipelineLayout m_pipelineLayout;
 
 	};
 }
