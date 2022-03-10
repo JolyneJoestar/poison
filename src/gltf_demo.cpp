@@ -44,6 +44,7 @@ void GLTFDemo::_initWindow()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	m_window = glfwCreateWindow(1200, 800, "gltf window", nullptr, nullptr);
+}
 
 void GLTFDemo::_initGraphicsContext()
 {
