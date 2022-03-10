@@ -128,5 +128,8 @@ namespace rs
 		//pipeline
 		VkPipelineLayout m_pipelineLayout;
 
+		//Renderpass
+		VkRenderPass m_renderPass;
+		VkPipelineLayout pipelineLayout;
 	};
 }

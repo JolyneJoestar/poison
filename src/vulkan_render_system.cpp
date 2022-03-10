@@ -362,6 +362,22 @@ namespace rs
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+		VkSubpassDescription subpass{};
+		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpass.colorAttachmentCount = 1;
+		subpass.pColorAttachments = &colorAttachmentRef;
+
+		VkRenderPassCreateInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassInfo.attachmentCount = 1;
+		renderPassInfo.pAttachments = &colorAttachment;
+		renderPassInfo.subpassCount = 1;
+		renderPassInfo.pSubpasses = &subpass;
+
+		if (vkCreateRenderPass(m_logicDevice, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create render pass");
+		}
 	}
 
 	void VulkanRenderSystem::setSurfaceHandle(GLFWwindow* window)
@@ -491,6 +507,7 @@ namespace rs
 	void VulkanRenderSystem::cleanUp()
 	{
 		vkDestroyPipelineLayout(m_logicDevice, m_pipelineLayout, nullptr);
+		vkDestroyRenderPass(m_logicDevice, m_renderPass, nullptr);
 		for (auto imageView : m_swapChainimageViews)
 		{
 			vkDestroyImageView(m_logicDevice, imageView, nullptr);
