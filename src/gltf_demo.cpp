@@ -1,5 +1,5 @@
 #include "gltf_demo.h"
-#include "GLFW/glfw3native.h"
+
 
 GLTFDemo::GLTFDemo()
 {
@@ -15,6 +15,7 @@ GLTFDemo::~GLTFDemo()
 void GLTFDemo::run()
 {
 	_initWindow();
+	_initGraphicsContext();
 	_mainLoop();
 	
 }
@@ -41,9 +42,12 @@ void GLTFDemo::_initWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	m_window = glfwCreateWindow(800, 600, "gltf window", nullptr, nullptr);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	m_window = glfwCreateWindow(1200, 800, "gltf window", nullptr, nullptr);
+}
 
-
+void GLTFDemo::_initGraphicsContext()
+{
 	uint32_t glfwExtensionCount;
 	const char** glfwExtension;
 
@@ -51,5 +55,13 @@ void GLTFDemo::_initWindow()
 
 	m_vulkanRenderSystem->setExtension(glfwExtension);
 	m_vulkanRenderSystem->setExtensionCount(glfwExtensionCount);
+	m_vulkanRenderSystem->setSurfaceHandle(m_window);
 	m_vulkanRenderSystem->creatInstance();
+
+	m_vulkanRenderSystem->pickPhysicalDevice();
+	m_vulkanRenderSystem->createLogicalDevice();
+	m_vulkanRenderSystem->createSwapChain();
+	m_vulkanRenderSystem->createImageViews();
+	m_vulkanRenderSystem->createRenderPass();
+	m_vulkanRenderSystem->createGraphicsPipeline();
 }
