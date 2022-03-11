@@ -1,5 +1,5 @@
+*.sdf
+*.suo
 x64/
 .vs/
 Debug/
-*.sdf
-*.suo
