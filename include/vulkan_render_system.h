@@ -63,6 +63,8 @@ namespace rs
 		void createGraphicsPipeline();
 
 		void createRenderPass();
+
+		void createFramebuffers();
 		//Extensions
 		void setExtensionCount(uint32_t count) { m_extensionCount = count; }
 		void setExtension(const char** extension) { m_extension = extension; }
@@ -131,5 +133,6 @@ namespace rs
 		//Renderpass
 		VkRenderPass m_renderPass;
 		VkPipelineLayout pipelineLayout;
+		VkPipeline m_graphicsPipline;
 	};
 }

@@ -9,6 +9,7 @@ GLTFDemo::GLTFDemo()
 
 GLTFDemo::~GLTFDemo()
 {
+	_cleanUp();
 	delete m_vulkanRenderSystem;
 }
 

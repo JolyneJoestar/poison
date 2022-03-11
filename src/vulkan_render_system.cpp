@@ -49,6 +49,7 @@ namespace rs
 		{
 			m_instanceCreatInfo.enabledLayerCount = 0;
 		}
+		std::cout << "creat instance." << std::endl;
 	}
 
 	bool VulkanRenderSystem::_isDeviceSuitable(VkPhysicalDevice device)
@@ -344,6 +345,28 @@ namespace rs
 			throw std::runtime_error("failed to create pipeline layout!");
 		}
 
+		VkGraphicsPipelineCreateInfo graphicsPiplineCreateInfo{};
+		graphicsPiplineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		graphicsPiplineCreateInfo.stageCount = 2;
+		graphicsPiplineCreateInfo.pStages = shaderStages;
+		graphicsPiplineCreateInfo.pVertexInputState = &vertexInputInfo;
+		graphicsPiplineCreateInfo.pInputAssemblyState = &inputAssembly;
+		graphicsPiplineCreateInfo.pViewportState = &viewportState;
+		graphicsPiplineCreateInfo.pRasterizationState = &rasterizer;
+		graphicsPiplineCreateInfo.pMultisampleState = &multisampling;
+		graphicsPiplineCreateInfo.pColorBlendState = &colorBlend;
+		graphicsPiplineCreateInfo.pDynamicState = nullptr;
+		graphicsPiplineCreateInfo.layout = m_pipelineLayout;
+		graphicsPiplineCreateInfo.subpass = 0;
+		graphicsPiplineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+		graphicsPiplineCreateInfo.basePipelineIndex = -1;
+
+		if (vkCreateGraphicsPipelines(m_logicDevice, VK_NULL_HANDLE, 1, &graphicsPiplineCreateInfo, nullptr,
+			&m_graphicsPipline) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create graphics pipline!");
+		}
+
 		vkDestroyShaderModule(m_logicDevice, vertShaderModule, nullptr);
 		vkDestroyShaderModule(m_logicDevice, fragShaderModule, nullptr);
 	}
@@ -378,6 +401,11 @@ namespace rs
 		{
 			throw std::runtime_error("failed to create render pass");
 		}
+	}
+
+	void VulkanRenderSystem::createFramebuffers()
+	{
+
 	}
 
 	void VulkanRenderSystem::setSurfaceHandle(GLFWwindow* window)
@@ -506,6 +534,7 @@ namespace rs
 
 	void VulkanRenderSystem::cleanUp()
 	{
+		vkDestroyPipeline(m_logicDevice, m_graphicsPipline, nullptr);
 		vkDestroyPipelineLayout(m_logicDevice, m_pipelineLayout, nullptr);
 		vkDestroyRenderPass(m_logicDevice, m_renderPass, nullptr);
 		for (auto imageView : m_swapChainimageViews)
@@ -516,7 +545,7 @@ namespace rs
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyDevice(m_logicDevice, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
-
+		
 	}
 
 	void VulkanRenderSystem::createLogicalDevice()
